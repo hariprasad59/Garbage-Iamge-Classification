@@ -6,6 +6,7 @@ from PIL import Image
 import numpy as np
 import os
 import gdown
+from huggingface_hub import hf_hub_download
 
 # -------------------------
 # CONFIG
@@ -35,15 +36,18 @@ h1 { color: #0d47a1; text-align: center; }
 </style>
 """, unsafe_allow_html=True)
 
-# -------------------------
-# Download model if missing
-# -------------------------
+REPO_ID = "HariPrasad599/garbage-image-classifier"
+MODEL_FILENAME = "best_model.pth"
+
 @st.cache_resource
 def download_model():
-    if not os.path.exists(MODEL_PATH):
-        with st.spinner("📥 Downloading AI model..."):
-            gdown.download(GDRIVE_URL, MODEL_PATH, quiet=False, fuzzy=True)
-download_model()
+    return hf_hub_download(
+        repo_id=REPO_ID,
+        filename=MODEL_FILENAME
+    )
+
+MODEL_PATH = download_model()
+
 
 # -------------------------
 # Image preprocessing
