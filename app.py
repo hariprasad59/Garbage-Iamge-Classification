@@ -20,21 +20,44 @@ DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # -------------------------
 # Custom CSS
 # -------------------------
-st.markdown("""
-<style>
-.stApp { background: #f0f2f6; font-family: 'Segoe UI', sans-serif; }
-h1 { color: #0d47a1; text-align: center; }
-.prediction-result-card {
-    background-color: #e3f2fd;
-    padding: 25px;
-    border-radius: 12px;
-    border-left: 5px solid #0d47a1;
-}
-.pred-label { font-size: 30px; font-weight: 800; color: #0d47a1; }
-.confidence { font-size: 20px; color: #388e3c; font-weight: 600; }
-[data-testid="stSidebar"] { background: #263238; color: white; }
-</style>
-""", unsafe_allow_html=True)
+st.markdown('<div class="app-title">♻️ Smart Waste AI Classifier</div>', unsafe_allow_html=True)
+
+st.markdown(
+    '<div class="info-box">Upload a waste image and the AI will classify it.</div>',
+    unsafe_allow_html=True
+)
+
+col1, col2 = st.columns([1, 1])
+
+uploaded_file = col1.file_uploader(
+    "Upload image",
+    type=["jpg", "jpeg", "png"]
+)
+
+if uploaded_file:
+    image = Image.open(uploaded_file).convert("RGB")
+    col1.image(image, use_container_width=True)
+
+    if col2.button("🚀 Predict"):
+        preds = predict_image(image)
+        label, prob = preds[0]
+
+        col2.markdown(
+            f"""
+            <div class="result-card">
+                <div class="result-label">{label}</div>
+                <div class="result-confidence">
+                    Confidence: {prob*100:.2f}%
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+        with col2.expander("🔍 Top predictions"):
+            for l, p in preds:
+                st.write(f"**{l}** — {p*100:.2f}%")
+
 
 REPO_ID = "HariPrasad599/garbage-image-classifier"
 MODEL_FILENAME = "best_model.pth"
@@ -145,3 +168,4 @@ st.sidebar.title("ℹ️ Model Info")
 st.sidebar.write("ResNet50")
 st.sidebar.write("Input size: 224×224")
 st.sidebar.write("Classes: Cardboard, Glass, Metal, Paper, Plastic, Trash")
+
